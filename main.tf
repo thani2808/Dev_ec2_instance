@@ -5,12 +5,7 @@ provider "aws" {
 
 }
 
-resource "aws_key_pair" "deployer" {
-  key_name   = var.key_name
-  public_key = var.public_key
-}
-
-/*module "vpc" {
+module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.19.0"
 
@@ -137,7 +132,7 @@ locals {
     description = "Ingress rules for port 80"
     },
     {
-      port        = 3389 # for windows image
+      port        = 3389
       description = "Ingress rules for port 3389"
     },
     {
@@ -206,61 +201,44 @@ resource "aws_security_group" "private_ec2" {
   tags = {
     Name = "Private-EC2-Security-Group"
   }
-}*/
+}
 
-# Security group allowing RDP
-resource "aws_security_group" "first_AMI_windows_sg" {
-  name        = "first_AMI_windows-sg"
-  description = "Allow RDP inbound traffic"
+resource "aws_key_pair" "deployer" {
+  key_name   = var.key_name
+  public_key = var.public_key
+}
 
+resource "aws_security_group" "firs_windows_image_sg" {
+  name        = "firs_windows_image_sg"
+  description = "Allow RDP"
   ingress {
     from_port   = 3389
     to_port     = 3389
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # ⚠️ Use a more secure range in production
+    cidr_blocks = ["0.0.0.0/0"] # You should restrict this in production!
   }
-
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = var.cidr_blocks_egress
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
-data "aws_ssm_parameter" "windows_2019_ami" {
-  name = "/aws/service/ami-windows-latest/Windows_Server-2019-English-Full-Base"
-}
-
-resource "aws_instance" "first_AMI_windows_instance" {
-  ami             = data.aws_ssm_parameter.windows_2019_ami.value
-  instance_type   = "t2.micro"
-  key_name        = var.key_name
-  security_groups = [aws_security_group.first_AMI_windows_sg.id]
+resource "aws_instance" "firs_windows_image_instance" {
+  ami                         = "ami-00305d2fa3c93abfc" # Example Windows AMI (adjust this!)
+  instance_type               = var.instance_type
+  key_name                    = var.key_name
+  vpc_security_group_ids      = [aws_security_group.windows_sg.id]
+  associate_public_ip_address = true
 
   tags = {
-    Name = "Windows2019-T2Micro"
+    Name = "WindowsAMIBase"
   }
 }
 
-/*# Launch a Windows EC2 instance
-resource "aws_instance" "first_AMI_windows_instance" {
-  ami             = "ami-03a64862e097d8d1b" # Example Windows AMI (check region-specific ID)
-  instance_type   = var.instance_type
-  key_name        = var.key_name # Replace with your key pair
-  security_groups = [aws_security_group.first_AMI_windows_sg.id]
-
-  tags = {
-    Name = "first-AMI-Terraform-Windows-Instance"
-  }
-
-  # Optionally add user_data for bootstrapping
-}*/
-
-# Create AMI from instance
 resource "aws_ami_from_instance" "windows_ami" {
-  name               = "custom-windows-ami"
-  source_instance_id = aws_instance.first_AMI_windows_instance.id
-  description        = "Custom Windows AMI created by Terraform"
-  depends_on         = [aws_instance.first_AMI_windows_instance]
+  name               = "firs_image_ami"
+  source_instance_id = aws_instance.firs_windows_image_instance.id
+  depends_on         = [aws_instance.firs-windows_image_instance]
 }

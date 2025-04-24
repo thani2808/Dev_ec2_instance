@@ -1,4 +1,4 @@
-/*output "private_subnet_id" {
+output "private_subnet_id" {
   value = module.vpc.private_subnets
 }
 
@@ -8,4 +8,4 @@ output "public_subnet_id" {
 
 output "IGW_id" {
   value = module.vpc.igw_id
-}*/
+}
