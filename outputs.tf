@@ -9,3 +9,7 @@ output "public_subnet_id" {
 output "IGW_id" {
   value = module.vpc.igw_id
 }
+
+# output "windows_instance_id" {
+#   value = aws_instance.firs_windows_image_instance.id
+# }
