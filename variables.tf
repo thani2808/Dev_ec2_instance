@@ -45,6 +45,9 @@ variable "ami" {
 variable "key_name" {
 }
 
+variable "my-windows-keys" {
+}
+
 variable "instance_type" {
 }
 
@@ -53,6 +56,6 @@ variable "public_key" {
 
 variable "cidr_blocks_ingress_bastion" {
   type = list(string)
-  #default = ["49.204.112.26/32"] # This is my home IPAdress
-  default = ["45.119.28.86/32"] # This is Raj home IPAdress
+  #default = ["49.204.137.211/32"] # This is my home IPAdress
+  default = ["45.119.28.105/32"] # This is Raj home IPAdress
 }
